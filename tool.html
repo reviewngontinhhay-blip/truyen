@@ -184,7 +184,7 @@
   <div class="error" id="error"></div>
 
   <div class="result" id="result">
-    <div class="result-label">Link dùng để đăng Facebook 👇</div>
+    <div class="result-label" id="result-label-main">Link dùng để đăng Facebook 👇</div>
     <div class="result-link" id="result-link"></div>
     <button class="copy-btn" onclick="copyLink()">📋 Copy link</button>
     <div class="result-label" style="font-size:0.75rem;color:#bbb">⏳ Link sẵn sàng sau ~1-2 phút</div>
@@ -450,12 +450,15 @@
       spin.className = 'spinner-wrap';
       btn.disabled = false;
 
+      const link = `https://${USER}.github.io/${REPO}/${page}/${slug}/`;
       if (resp.ok) {
-        const link = `https://${USER}.github.io/${REPO}/${page}/${slug}/`;
+        document.getElementById('result-label-main').textContent = 'Link dùng để đăng Facebook 👇';
         document.getElementById('result-link').textContent = link;
         res.className = 'result show';
       } else if (resp.status === 422) {
-        showError('Bộ này đã có link rồi! Thử đổi tên một chút hoặc xóa file cũ trên GitHub.');
+        document.getElementById('result-label-main').textContent = '⚠️ Bộ này đã có link trước đó rồi 👇';
+        document.getElementById('result-link').textContent = link;
+        res.className = 'result show';
       } else {
         const d = await resp.json();
         showError('Lỗi: ' + (d.message || resp.status));
