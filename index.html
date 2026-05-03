@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📚 Truyện Ngôn Tình</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #fff0f5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px;
+      gap: 32px;
+    }
+    h1 { color: #c0306a; font-size: 1.6rem; text-align: center; }
+    .cards { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+    .card {
+      background: white;
+      border-radius: 14px;
+      padding: 28px 32px;
+      box-shadow: 0 2px 16px rgba(192,48,106,0.12);
+      text-decoration: none;
+      color: #1a1a1a;
+      font-size: 1.1rem;
+      font-weight: 600;
+      text-align: center;
+      transition: transform .15s;
+      min-width: 180px;
+    }
+    .card:hover { transform: translateY(-4px); }
+    .card span { display: block; font-size: 2rem; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <h1>📚 Chọn trang của bạn</h1>
+  <div class="cards">
+    <a class="card" href="./cong-chua/">
+      <span>👑</span>Công Chúa Mê Ngôn Tình
+    </a>
+    <a class="card" href="./phu-thuy/">
+      <span>🔮</span>Phù Thuỷ Chỉ Muốn Đọc Truyện
+    </a>
+  </div>
+</body>
+</html>
