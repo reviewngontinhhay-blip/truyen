@@ -166,6 +166,14 @@
     <div class="hint">Chỉnh tay nếu tên chưa đúng</div>
   </div>
 
+  <div>
+    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;color:#555">
+      <input type="checkbox" id="nap-ho" style="width:18px;height:18px;accent-color:#c0306a;cursor:pointer;flex-shrink:0" />
+      Bộ này có dịch vụ nạp hộ 📦
+    </label>
+    <div class="hint">Tick vào nếu muốn hiện câu mời nạp hộ trên trang chuyển hướng</div>
+  </div>
+
   <button id="btn" onclick="taoLink()">✨ Tạo link ngay</button>
 
   <div class="spinner-wrap" id="spinner">
@@ -296,13 +304,19 @@
       .replace(/-+/g, '-');
   }
 
-  function makeHtml(url, ten, page) {
+  function makeHtml(url, ten, page, hasNapHo) {
     const isCongChua = page === 'cong-chua';
     const pageLabel  = isCongChua ? 'Công chúa' : 'Phù thuỷ';
     const pageName   = isCongChua ? 'Công Chúa Mê Ngôn Tình' : 'Phù Thuỷ Chỉ Muốn Đọc Truyện';
     const accentColor = isCongChua ? '#c0306a' : '#6a30c0';
     const bgColor     = isCongChua ? '#fff0f5' : '#f3f0ff';
     const spinBorder  = isCongChua ? '#ffd6e7' : '#ddd6ff';
+    const promoBlock = hasNapHo ? `
+    <div class="divider"></div>
+    <div class="promo">
+      <strong>${pageLabel}</strong> có nhận nạp hộ full bộ này,<br>
+      cần thì nhắn tin cho <strong>${pageLabel}</strong> nhaaaa 🥰
+    </div>` : '';
 
     return `<!DOCTYPE html>
 <html lang="vi">
@@ -382,12 +396,7 @@
   <div class="wrap">
     <div class="spinner"></div>
     <div class="title-book">📖 ${ten}</div>
-    <div class="sub">Đang chuyển đến trang đọc... <a href="${url}">Nhấn đây nếu chậm</a> 💕</div>
-    <div class="divider"></div>
-    <div class="promo">
-      <strong>${pageLabel}</strong> có nhận nạp hộ full bộ này,<br>
-      cần thì nhắn tin cho <strong>${pageLabel}</strong> nhaaaa 🥰
-    </div>
+    <div class="sub">Đang chuyển đến trang đọc... <a href="${url}">Nhấn đây nếu chậm</a> 💕</div>${promoBlock}
     <div class="page-name">${pageName}</div>
   </div>
   <script data-goatcounter="https://congchuamengontinh.goatcounter.com/count"
@@ -402,13 +411,14 @@
   }
 
   async function taoLink() {
-    const page  = document.getElementById('page').value;
-    const ten   = document.getElementById('ten').value.trim();
-    const url   = document.getElementById('url').value.trim();
-    const btn   = document.getElementById('btn');
-    const err   = document.getElementById('error');
-    const res   = document.getElementById('result');
-    const spin  = document.getElementById('spinner');
+    const page    = document.getElementById('page').value;
+    const ten     = document.getElementById('ten').value.trim();
+    const url     = document.getElementById('url').value.trim();
+    const hasNapHo = document.getElementById('nap-ho').checked;
+    const btn     = document.getElementById('btn');
+    const err     = document.getElementById('error');
+    const res     = document.getElementById('result');
+    const spin    = document.getElementById('spinner');
 
     err.className = 'error';
     res.className = 'result';
@@ -418,7 +428,7 @@
 
     const slug = toSlug(ten);
     const path = `${page}/${slug}/index.html`;
-    const html = makeHtml(url, ten, page);
+    const html = makeHtml(url, ten, page, hasNapHo);
     const content = btoa(unescape(encodeURIComponent(html)));
 
     btn.disabled = true;
