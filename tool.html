@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔗 Tạo Link Truyện</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #fff0f5;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 24px rgba(192,48,106,0.12);
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    h1 { font-size: 1.4rem; color: #c0306a; text-align: center; }
+    label { font-size: 0.85rem; color: #555; font-weight: 600; display: block; margin-bottom: 6px; }
+    select, input[type="text"], input[type="url"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #f0c0d4;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border .2s;
+      font-family: inherit;
+    }
+    select:focus, input:focus { border-color: #c0306a; }
+    .hint { font-size: 0.78rem; color: #aaa; margin-top: 4px; }
+    .input-wrap { position: relative; }
+    .fetch-status {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.8rem;
+      color: #c0306a;
+    }
+    .mini-spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid #ffd6e7;
+      border-top-color: #c0306a;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+    }
+    button {
+      background: #c0306a;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .2s, transform .1s;
+    }
+    button:hover { background: #a02558; }
+    button:active { transform: scale(0.98); }
+    button:disabled { background: #e0a0bc; cursor: not-allowed; }
+    .result {
+      display: none;
+      background: #fff0f5;
+      border: 1.5px solid #f0c0d4;
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .result.show { display: flex; }
+    .result-label { font-size: 0.82rem; color: #888; }
+    .result-link {
+      font-size: 0.9rem;
+      color: #c0306a;
+      font-weight: 600;
+      word-break: break-all;
+      background: white;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid #f0c0d4;
+    }
+    .copy-btn {
+      background: white;
+      color: #c0306a;
+      border: 1.5px solid #c0306a;
+      border-radius: 8px;
+      padding: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .copy-btn:hover { background: #fff0f5; }
+    .error {
+      display: none;
+      background: #fff0f0;
+      border: 1.5px solid #ffcccc;
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 0.88rem;
+      color: #c00;
+      text-align: center;
+    }
+    .error.show { display: block; }
+    .spinner-wrap { display: none; align-items: center; justify-content: center; gap: 10px; color: #c0306a; font-size: 0.9rem; }
+    .spinner-wrap.show { display: flex; }
+    .spinner {
+      width: 20px; height: 20px;
+      border: 3px solid #ffd6e7;
+      border-top-color: #c0306a;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+<!-- Màn hình nhập token lần đầu -->
+<div class="card" id="setup-screen" style="display:none">
+  <h1>🔑 Cài đặt lần đầu</h1>
+  <div>
+    <label>Nhập GitHub Token</label>
+    <input type="password" id="token-input" placeholder="ghp_..." />
+    <div class="hint">Chỉ cần nhập 1 lần — trình duyệt sẽ nhớ cho những lần sau 💾</div>
+  </div>
+  <button onclick="luuToken()">✅ Lưu và bắt đầu</button>
+</div>
+
+<div class="card" id="main-screen" style="display:none">
+  <h1>🔗 Tạo Link Truyện</h1>
+
+  <div>
+    <label>Thuộc page nào?</label>
+    <select id="page">
+      <option value="cong-chua">👑 Công Chúa Mê Ngôn Tình</option>
+      <option value="phu-thuy">🔮 Phù Thuỷ Chỉ Muốn Đọc Truyện</option>
+    </select>
+  </div>
+
+  <div>
+    <label>Link truyện gốc</label>
+    <div class="input-wrap">
+      <input type="url" id="url" placeholder="https://truyenhd.cc/truyen/..." oninput="onUrlChange()" />
+      <span class="fetch-status" id="fetch-status"></span>
+    </div>
+    <div class="hint" id="url-hint">Dán link vào — tên truyện sẽ tự điền 🪄</div>
+  </div>
+
+  <div>
+    <label>Tên bộ truyện</label>
+    <input type="text" id="ten" placeholder="Tự động điền khi dán link..." />
+    <div class="hint">Chỉnh tay nếu tên chưa đúng</div>
+  </div>
+
+  <button id="btn" onclick="taoLink()">✨ Tạo link ngay</button>
+
+  <div class="spinner-wrap" id="spinner">
+    <div class="spinner"></div>
+    <span>Đang tạo link...</span>
+  </div>
+
+  <div class="error" id="error"></div>
+
+  <div class="result" id="result">
+    <div class="result-label">Link dùng để đăng Facebook 👇</div>
+    <div class="result-link" id="result-link"></div>
+    <button class="copy-btn" onclick="copyLink()">📋 Copy link</button>
+    <div class="result-label" style="font-size:0.75rem;color:#bbb">⏳ Link sẵn sàng sau ~1-2 phút</div>
+  </div>
+  <div style="text-align:center">
+    <a href="#" onclick="doiToken()" style="font-size:0.75rem;color:#ddd;text-decoration:none">Đổi token</a>
+  </div>
+</div>
+
+<script>
+  const USER  = 'reviewngontinhhay-blip';
+  const REPO  = 'truyen';
+
+  // Token lấy từ localStorage (người dùng tự nhập 1 lần)
+  function getToken() { return localStorage.getItem('gh_tk') || ''; }
+  function saveToken(t) { localStorage.setItem('gh_tk', t); }
+
+  // Khởi động: kiểm tra token
+  window.onload = function() {
+    if (getToken()) {
+      document.getElementById('setup-screen').style.display = 'none';
+      document.getElementById('main-screen').style.display = 'flex';
+    } else {
+      document.getElementById('setup-screen').style.display = 'flex';
+      document.getElementById('main-screen').style.display = 'none';
+    }
+  };
+
+  function luuToken() {
+    const t = document.getElementById('token-input').value.trim();
+    if (!t.startsWith('ghp_') && !t.startsWith('github_pat_')) {
+      alert('Token không đúng định dạng! Phải bắt đầu bằng ghp_');
+      return;
+    }
+    saveToken(t);
+    document.getElementById('setup-screen').style.display = 'none';
+    document.getElementById('main-screen').style.display = 'flex';
+  }
+
+  function doiToken() {
+    localStorage.removeItem('gh_tk');
+    document.getElementById('setup-screen').style.display = 'flex';
+    document.getElementById('main-screen').style.display = 'none';
+  }
+
+  let fetchTimer = null;
+
+  function onUrlChange() {
+    clearTimeout(fetchTimer);
+    const url = document.getElementById('url').value.trim();
+    if (!url.startsWith('http')) return;
+    fetchTimer = setTimeout(() => fetchTitle(url), 800);
+  }
+
+  async function fetchTitle(url) {
+    const status = document.getElementById('fetch-status');
+    const tenInput = document.getElementById('ten');
+    status.innerHTML = '<span class="mini-spinner"></span>';
+
+    try {
+      const proxy = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
+      const resp = await fetch(proxy);
+      const data = await resp.json();
+      const html = data.contents;
+
+      // Thử lấy từ <title>
+      let title = '';
+      const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+      if (titleMatch) {
+        title = titleMatch[1]
+          .replace(/\s*[-|–]\s*.*/g, '')  // bỏ phần sau dấu - hoặc |
+          .replace(/\bchương\s*\d+.*/gi, '') // bỏ "chương X"
+          .replace(/\bchap\s*\d+.*/gi, '')
+          .replace(/&amp;/g, '&')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .trim();
+      }
+
+      // Nếu không lấy được từ title, thử parse từ URL slug
+      if (!title) {
+        title = slugToTitle(url);
+      }
+
+      if (title) {
+        tenInput.value = title;
+        status.textContent = '✅';
+        setTimeout(() => status.textContent = '', 2000);
+      } else {
+        status.textContent = '';
+      }
+    } catch(e) {
+      // Fallback: parse từ URL
+      const fallback = slugToTitle(url);
+      if (fallback) tenInput.value = fallback;
+      status.textContent = '';
+    }
+  }
+
+  function slugToTitle(url) {
+    try {
+      const parts = new URL(url).pathname.replace(/\/$/, '').split('/');
+      const slug = parts[parts.length - 1];
+      return slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    } catch(e) { return ''; }
+  }
+
+  function toSlug(str) {
+    return str
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .replace(/đ/g, 'd').replace(/Đ/g, 'd')
+      .replace(/[^a-z0-9\s-]/g, '')
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-');
+  }
+
+  function makeHtml(url, ten, page) {
+    const isCongChua = page === 'cong-chua';
+    const pageLabel  = isCongChua ? 'Công chúa' : 'Phù thuỷ';
+    const pageName   = isCongChua ? 'Công Chúa Mê Ngôn Tình' : 'Phù Thuỷ Chỉ Muốn Đọc Truyện';
+    const accentColor = isCongChua ? '#c0306a' : '#6a30c0';
+    const bgColor     = isCongChua ? '#fff0f5' : '#f3f0ff';
+    const spinBorder  = isCongChua ? '#ffd6e7' : '#ddd6ff';
+
+    return `<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="refresh" content="3;url=${url}" />
+  <title>${ten} — Đang tải...</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: ${bgColor};
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 0;
+      padding: 32px 20px;
+    }
+    .wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      max-width: 400px;
+      width: 100%;
+    }
+    .spinner {
+      width: 56px; height: 56px;
+      border: 5px solid ${spinBorder};
+      border-top-color: ${accentColor};
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .title-book {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: ${accentColor};
+      text-align: center;
+      line-height: 1.5;
+    }
+    .sub {
+      font-size: 0.85rem;
+      color: #999;
+      text-align: center;
+    }
+    .sub a { color: ${accentColor}; font-weight: 600; text-decoration: none; }
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: ${spinBorder};
+      margin: 4px 0;
+    }
+    .promo {
+      background: white;
+      border-radius: 14px;
+      padding: 18px 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      text-align: center;
+      font-size: 0.92rem;
+      color: #444;
+      line-height: 1.7;
+      width: 100%;
+    }
+    .promo strong { color: ${accentColor}; }
+    .page-name {
+      font-size: 0.78rem;
+      color: #bbb;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="spinner"></div>
+    <div class="title-book">📖 ${ten}</div>
+    <div class="sub">Đang chuyển đến trang đọc... <a href="${url}">Nhấn đây nếu chậm</a> 💕</div>
+    <div class="divider"></div>
+    <div class="promo">
+      <strong>${pageLabel}</strong> có nhận nạp hộ full bộ này,<br>
+      cần thì nhắn tin cho <strong>${pageLabel}</strong> nhaaaa 🥰
+    </div>
+    <div class="page-name">${pageName}</div>
+  </div>
+  <script>
+    setTimeout(function() {
+      window.location.replace("${url}");
+    }, 3000);
+  <\/script>
+</body>
+</html>`;
+  }
+
+  async function taoLink() {
+    const page  = document.getElementById('page').value;
+    const ten   = document.getElementById('ten').value.trim();
+    const url   = document.getElementById('url').value.trim();
+    const btn   = document.getElementById('btn');
+    const err   = document.getElementById('error');
+    const res   = document.getElementById('result');
+    const spin  = document.getElementById('spinner');
+
+    err.className = 'error';
+    res.className = 'result';
+
+    if (!ten) { showError('Bạn chưa có tên bộ truyện — thử dán link lại hoặc tự điền nhé!'); return; }
+    if (!url || !url.startsWith('http')) { showError('Link truyện không hợp lệ!'); return; }
+
+    const slug = toSlug(ten);
+    const path = `${page}/${slug}/index.html`;
+    const html = makeHtml(url, ten, page);
+    const content = btoa(unescape(encodeURIComponent(html)));
+
+    btn.disabled = true;
+    spin.className = 'spinner-wrap show';
+
+    try {
+      const resp = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/${path}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `token ${getToken()}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: `Add: ${ten}`,
+          content: content
+        })
+      });
+
+      spin.className = 'spinner-wrap';
+      btn.disabled = false;
+
+      if (resp.ok) {
+        const link = `https://${USER}.github.io/${REPO}/${page}/${slug}/`;
+        document.getElementById('result-link').textContent = link;
+        res.className = 'result show';
+      } else if (resp.status === 422) {
+        showError('Bộ này đã có link rồi! Thử đổi tên một chút hoặc xóa file cũ trên GitHub.');
+      } else {
+        const d = await resp.json();
+        showError('Lỗi: ' + (d.message || resp.status));
+      }
+    } catch(e) {
+      spin.className = 'spinner-wrap';
+      btn.disabled = false;
+      showError('Mất kết nối internet, thử lại nhé!');
+    }
+  }
+
+  function showError(msg) {
+    const err = document.getElementById('error');
+    err.textContent = msg;
+    err.className = 'error show';
+  }
+
+  function copyLink() {
+    const link = document.getElementById('result-link').textContent;
+    navigator.clipboard.writeText(link).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      btn.textContent = '✅ Đã copy!';
+      setTimeout(() => btn.textContent = '📋 Copy link', 2000);
+    });
+  }
+</script>
+</body>
+</html>
