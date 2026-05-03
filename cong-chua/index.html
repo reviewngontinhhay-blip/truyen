@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>👑 Công Chúa Mê Ngôn Tình — Danh mục truyện</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #fff0f5;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 16px;
+    }
+    header { text-align: center; margin-bottom: 32px; }
+    header h1 { font-size: 1.7rem; color: #c0306a; margin-bottom: 8px; }
+    header p { color: #888; font-size: 0.9rem; }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+      max-width: 900px;
+      width: 100%;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 12px rgba(192,48,106,0.10);
+      text-decoration: none;
+      color: inherit;
+      transition: transform .15s;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .card:hover { transform: translateY(-3px); }
+    .tag {
+      font-size: 0.75rem;
+      background: #ffe4ee;
+      color: #c0306a;
+      padding: 2px 10px;
+      border-radius: 99px;
+      align-self: flex-start;
+    }
+    .card h2 { font-size: 1rem; color: #1a1a1a; line-height: 1.4; }
+    .card p { font-size: 0.85rem; color: #666; line-height: 1.5; }
+    .cta { margin-top: 4px; font-size: 0.85rem; color: #c0306a; font-weight: 600; }
+    footer { margin-top: 48px; font-size: 0.8rem; color: #bbb; text-align: center; }
+    .back { margin-bottom: 20px; font-size: 0.85rem; color: #c0306a; text-decoration: none; }
+    .back:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <a class="back" href="../">← Về trang chủ</a>
+  <header>
+    <h1>👑 Công Chúa Mê Ngôn Tình</h1>
+    <p>Danh mục truyện đang giới thiệu · Cập nhật thường xuyên 💕</p>
+  </header>
+  <div class="card-grid">
+
+    <a class="card" href="./thai-tu/">
+      <span class="tag">Trọng sinh · Cổ đại</span>
+      <h2>Sau Khi Bị Thái Tử Cố Chấp Đoạt Hôn</h2>
+      <p>Nam chính cố chấp đáng yêu, plot trọng sinh đoạt hôn cực ngọt 😍</p>
+      <span class="cta">Đọc ngay →</span>
+    </a>
+
+  </div>
+  <footer>Muốn múc hộ full bộ? Nhắn qua page Công Chúa Mê Ngôn Tình nhé 👀</footer>
+</body>
+</html>
