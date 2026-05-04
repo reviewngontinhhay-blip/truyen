@@ -330,7 +330,11 @@
       : hasNapHo
         ? `${pageLabel} có nhận nạp hộ full bộ này, cần thì nhắn cho ${pageLabel} nhaaaa`
         : `Đọc ở đây nhaaaa`;
-    const ogImageTag = ogImage ? `\n  <meta property="og:image" content="${ogImage}" />` : '';
+    const defaultOgImage = isCongChua
+      ? `https://${USER}.github.io/${REPO}/og-cong-chua.jpg`
+      : `https://${USER}.github.io/${REPO}/og-phu-thuy.jpg`;
+    const finalOgImage = ogImage || defaultOgImage;
+    const ogImageTag = `\n  <meta property="og:image" content="${finalOgImage}" />`;
     const promoBlock = [
       can1111 ? `
     <div class="divider"></div>
