@@ -174,6 +174,14 @@
     <div class="hint">Tick vào nếu muốn hiện câu mời nạp hộ trên trang chuyển hướng</div>
   </div>
 
+  <div>
+    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;color:#555">
+      <input type="checkbox" id="can-1111" style="width:18px;height:18px;accent-color:#c0306a;cursor:pointer;flex-shrink:0" />
+      Cần bật 1.1.1.1 để đọc 🌐
+    </label>
+    <div class="hint">Tick vào nếu web này bị chặn ở Việt Nam (Wattpad...)</div>
+  </div>
+
   <button id="btn" onclick="taoLink()">✨ Tạo link ngay</button>
 
   <div class="spinner-wrap" id="spinner">
@@ -310,23 +318,32 @@
       .replace(/-+/g, '-');
   }
 
-  function makeHtml(url, ten, page, hasNapHo, ogImage) {
+  function makeHtml(url, ten, page, hasNapHo, can1111, ogImage) {
     const isCongChua = page === 'cong-chua';
     const pageLabel  = isCongChua ? 'Công chúa' : 'Phù thuỷ';
     const pageName   = isCongChua ? 'Công Chúa Mê Ngôn Tình' : 'Phù Thuỷ Chỉ Muốn Đọc Truyện';
     const accentColor = isCongChua ? '#c0306a' : '#6a30c0';
     const bgColor     = isCongChua ? '#fff0f5' : '#f3f0ff';
     const spinBorder  = isCongChua ? '#ffd6e7' : '#ddd6ff';
-    const promoDesc  = hasNapHo
-      ? `${pageLabel} có nhận nạp hộ full bộ này, cần thì nhắn cho ${pageLabel} nhaaaa`
-      : `Đọc ở đây nhaaaa`;
+    const promoDesc = can1111
+      ? `Nhớ bật 1.1.1.1 để vào đọc nhaaaa`
+      : hasNapHo
+        ? `${pageLabel} có nhận nạp hộ full bộ này, cần thì nhắn cho ${pageLabel} nhaaaa`
+        : `Đọc ở đây nhaaaa`;
     const ogImageTag = ogImage ? `\n  <meta property="og:image" content="${ogImage}" />` : '';
-    const promoBlock = hasNapHo ? `
+    const promoBlock = [
+      can1111 ? `
+    <div class="divider"></div>
+    <div class="promo">
+      ⚠️ Web này bị chặn ở VN — nhớ bật <strong>1.1.1.1</strong> trước khi đọc nhaaaa
+    </div>` : '',
+      hasNapHo ? `
     <div class="divider"></div>
     <div class="promo">
       <strong>${pageLabel}</strong> có nhận nạp hộ full bộ này,<br>
       cần thì nhắn tin cho <strong>${pageLabel}</strong> nhaaaa 🥰
-    </div>` : '';
+    </div>` : ''
+    ].join('');
 
     return `<!DOCTYPE html>
 <html lang="vi">
@@ -427,6 +444,7 @@
     const ten     = document.getElementById('ten').value.trim();
     const url     = document.getElementById('url').value.trim();
     const hasNapHo = document.getElementById('nap-ho').checked;
+    const can1111  = document.getElementById('can-1111').checked;
     const btn     = document.getElementById('btn');
     const err     = document.getElementById('error');
     const res     = document.getElementById('result');
@@ -440,7 +458,7 @@
 
     const slug = toSlug(ten);
     const path = `${page}/${slug}/index.html`;
-    const html = makeHtml(url, ten, page, hasNapHo, window.lastOgImage || '');
+    const html = makeHtml(url, ten, page, hasNapHo, can1111, window.lastOgImage || '');
     const content = btoa(unescape(encodeURIComponent(html)));
 
     btn.disabled = true;
