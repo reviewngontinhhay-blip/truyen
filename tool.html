@@ -264,6 +264,11 @@
           .trim();
       }
 
+      // Lấy og:image để dùng cho preview Facebook
+      const ogImgMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
+                      || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
+      window.lastOgImage = ogImgMatch ? ogImgMatch[1] : '';
+
       // Nếu không lấy được từ title, thử parse từ URL slug
       if (!title) {
         title = slugToTitle(url);
@@ -280,6 +285,7 @@
       // Fallback: parse từ URL
       const fallback = slugToTitle(url);
       if (fallback) tenInput.value = fallback;
+      window.lastOgImage = '';
       status.textContent = '';
     }
   }
@@ -304,13 +310,17 @@
       .replace(/-+/g, '-');
   }
 
-  function makeHtml(url, ten, page, hasNapHo) {
+  function makeHtml(url, ten, page, hasNapHo, ogImage) {
     const isCongChua = page === 'cong-chua';
     const pageLabel  = isCongChua ? 'Công chúa' : 'Phù thuỷ';
     const pageName   = isCongChua ? 'Công Chúa Mê Ngôn Tình' : 'Phù Thuỷ Chỉ Muốn Đọc Truyện';
     const accentColor = isCongChua ? '#c0306a' : '#6a30c0';
     const bgColor     = isCongChua ? '#fff0f5' : '#f3f0ff';
     const spinBorder  = isCongChua ? '#ffd6e7' : '#ddd6ff';
+    const promoDesc  = hasNapHo
+      ? `${pageLabel} có nhận nạp hộ full bộ này, cần thì nhắn cho ${pageLabel} nhaaaa`
+      : `Đọc ở đây nhaaaa`;
+    const ogImageTag = ogImage ? `\n  <meta property="og:image" content="${ogImage}" />` : '';
     const promoBlock = hasNapHo ? `
     <div class="divider"></div>
     <div class="promo">
@@ -324,6 +334,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="refresh" content="3;url=${url}" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="${ten}" />
+  <meta property="og:description" content="${promoDesc}" />${ogImageTag}
   <title>${ten} — Đang tải...</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -428,7 +441,7 @@
 
     const slug = toSlug(ten);
     const path = `${page}/${slug}/index.html`;
-    const html = makeHtml(url, ten, page, hasNapHo);
+    const html = makeHtml(url, ten, page, hasNapHo, window.lastOgImage || '');
     const content = btoa(unescape(encodeURIComponent(html)));
 
     btn.disabled = true;
